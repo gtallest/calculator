@@ -1,16 +1,41 @@
-var equation = "";
+//Next Steps:
+//Add Order of Operations / Nested Functionality
+//Implement Keyboard Functionality
+//Implement CE Functionality
+
+var numArray = [];
+var operatorArray = [];
 var currentNum = "";
 var prevOperator;
+var lastKey;
+var nestedNum = [];
+var nestedOperator = [];
+var nested = false;
+
+$(".calculator-button").on("click",function(){
+  $(".calculator-button").removeClass('active');
+  $(this).addClass('active');
+});
 
 $(".number").on("click",function(){
+  if(prevOperator == "="){
+    numArray = [];
+    operatorArray = [];
+    currentNum = "";
+    prevOperator = "";
+  }
   currentNum += this.innerHTML;
-  equation += this.innerHTML;
+  lastKey = this.innerHTMl;
+//  equation += this.innerHTML;
   $("#output").html(currentNum);
 });
 
 $(".clear-button").on("click",function(){
   currentNum = "";
-  equation = "";
+//  equation = "";
+  numArray = [];
+  operatorArray = [];
+  lastKey = "";
   $("#output").html("0");
 })
 
@@ -19,29 +44,43 @@ $('#decimal').on('click',function(){
 
   }
   else {
-    if(currentNum == "0"){
+    if(currentNum == "0" || prevOperator == "="){
       currentNum = "0.";
+      prevOperator = "";
+      numArray = [];
+      operatorArray = [];
     }
     else {
       currentNum += '.';
-      equation += '.';
+//      equation += '.';
     }
+    lastKey = ".";
     $('#output').html(currentNum);
   }
 });
 
 $('#plus').on('click',function(){
-  if(!prevOperator){
-    currentNum = "";
+  if(!isOperator(lastKey)){
+    numArray.push(currentNum);
+    if(!prevOperator){
+      currentNum = "";
+    }
+    else {
+      evaluateEquation();
+    }
+    prevOperator = "+";
+    lastKey = "+";
+    operatorArray.push("+");
   }
   else {
-    evaluateEquation();
+    operatorArray.pop();
+    operatorArray.push("+");
   }
-  prevOperator = "+";
-  equation += "+";
 });
 
 $('#minus').on('click',function(){
+  if(!isOperator(lastKey)){
+  numArray.push(currentNum);
   if(!prevOperator){
     currentNum = "";
   }
@@ -49,10 +88,18 @@ $('#minus').on('click',function(){
     evaluateEquation();
   }
   prevOperator = "-";
-  equation += "-";
+  lastKey = "-";
+  operatorArray.push("-");
+}
+else {
+  operatorArray.pop();
+  operatorArray.push("-");
+}
 });
 
 $('#multiply').on('click',function(){
+  if(!isOperator(lastKey)){
+  numArray.push(currentNum);
   if(!prevOperator){
     currentNum = "";
   }
@@ -60,10 +107,18 @@ $('#multiply').on('click',function(){
     evaluateEquation();
   }
   prevOperator = "X";
-  equation += "X";
+  lastKey = "X";
+  operatorArray.push("X");
+}
+else {
+  operatorArray.pop();
+  operatorArray.push("X");
+}
 });
 
 $('#divide').on('click',function(){
+  if(!isOperator(lastKey)){
+  numArray.push(currentNum);
   if(!prevOperator){
     currentNum = "";
   }
@@ -71,20 +126,28 @@ $('#divide').on('click',function(){
     evaluateEquation();
   }
   prevOperator = "/";
-  equation += "/";
+  lastKey = "/";
+  operatorArray.push("/");
+}
+else {
+  operatorArray.pop();
+  operatorArray.push("/");
+}
 });
 
 $('#equals').on('click',function(){
+  numArray.push(currentNum);
   evaluateEquation();
-  prevOperator = "";
+  prevOperator = "=";
+  lastKey = "=";
 });
 
 function evaluateEquation() {
   var regex = new RegExp(/\s?\d*\.?\d*\s?/);
   var regex2 = new RegExp (/[^\d*\.?(\d*)?]/);
 
-  var numArray = equation.split(regex2).filter(function(a){ return a != ""; });
-  var operatorArray = equation.split(regex).filter(function(a){ return (a != "" && a != undefined); });
+//  var numArray = equation.split(regex2).filter(function(a){ return a != ""; });
+//  var operatorArray = equation.split(regex).filter(function(a){ return (a != "" && a != undefined); });
   console.log(numArray);
   console.log(operatorArray);
   var total = parseFloat(numArray[0]);
@@ -111,9 +174,18 @@ function evaluateEquation() {
 
     i++;
   }
-  equation = total;
+  numArray = [];
+  operatorArray = [];
+  numArray.push(total);
   currentNum = "";
 
   $('#output').html(total);
 
+}
+
+function isOperator(operator){
+  if(operator == "+" || operator == "-" || operator == "X" || operator == "/"){
+    return true;
+  }
+  return false;
 }

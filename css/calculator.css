@@ -68,3 +68,7 @@ color:white;
 .clear-button {
   background:#ff3030;
 }
+
+.active {
+  background-color:orange;
+}
